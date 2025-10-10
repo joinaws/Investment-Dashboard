@@ -32,12 +32,7 @@
         .chart-container { height: 300px; margin-top: 20px; }
         .expense-chart { height: 250px; margin-top: 20px; }
         .highlight { background-color: #e8f4fd; font-weight: bold; }
-        .adjustment-section { background: white; border-radius: 10px; padding: 20px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
-        .adjustment-section h2 { color: #2c3e50; margin-bottom: 15px; border-bottom: 2px solid #eaeaea; padding-bottom: 10px; }
-        .adjustment-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eaeaea; }
-        .adjustment-item:last-child { border-bottom: none; }
-        .adjustment-name { font-weight: 500; }
-        .adjustment-amount { font-weight: bold; color: #e74c3c; }
+        .adjustment-section { display: none; } /* Hide adjustments */
         @media (max-width: 768px) {
             .dashboard-grid { grid-template-columns: 1fr; }
             .summary-cards { grid-template-columns: 1fr; }
@@ -66,11 +61,12 @@
             </div>
         </div>
         
+        <!-- Adjustments section is hidden -->
         <div class="adjustment-section">
             <h2>Adjustments</h2>
             <div class="adjustment-item">
                 <div class="adjustment-name">Less: Pankaj MISC</div>
-                <div class="adjustment-amount">₹250,000</div>
+                <div class="adjustment-amount">₹0</div>
             </div>
         </div>
         
@@ -112,7 +108,7 @@
     </div>
 
     <script>
-        // Investment data (Jan-23 note remains unchanged)
+        // Investment data
         const investmentData = [
             { month: 'Jan-23', pankaj: 0, puneet: 0, lucky: 20000, total: 20000, note: 'Pankaj Received 20000' },
             { month: 'Feb-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
@@ -147,9 +143,7 @@
             { month: 'Jul-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
             { month: 'Aug-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
             { month: 'Sep-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
-            { month: 'Oct-25', pankaj: 0, puneet: 0, lucky: 0, total: 0 },
-            { month: 'Nov-25', pankaj: 0, puneet: 0, lucky: 0, total: 0 },
-            { month: 'Dec-25', pankaj: 0, puneet: 0, lucky: 0, total: 0 }
+            { month: 'Oct-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 }
         ];
 
         // Expense data
@@ -159,9 +153,9 @@
             { category: 'Mitti', amount: 4000 }
         ];
 
-        // Adjustment data
+        // Adjustment data with 0 amount
         const adjustmentData = [
-            { name: 'Less: Pankaj MISC', amount: 250000 }
+            { name: 'Less: Pankaj MISC', amount: 0 }
         ];
 
         // Populate investment table
