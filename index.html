@@ -7,42 +7,57 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: #f5f7fa; padding: 20px; }
 
         .dashboard-container { max-width: 1150px; margin: auto; }
 
-        header { background: linear-gradient(135deg, #2c3e50, #4a6491); color: #fff; padding: 22px; border-radius: 10px; text-align: center; margin-bottom: 25px; }
+        header { background: linear-gradient(135deg, #2c3e50, #4a6491); color: #fff;
+                 padding: 22px; border-radius: 10px; text-align: center; margin-bottom: 25px; }
 
         .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 25px; }
-        .summary-card { background: #fff; padding: 18px; border-radius: 10px; text-align: center; box-shadow: 0 5px 12px rgba(0,0,0,0.06); }
+        .summary-card { background: #fff; padding: 18px; border-radius: 10px; text-align: center;
+                         box-shadow: 0 5px 12px rgba(0,0,0,0.06); }
         .summary-card h3 { font-size: 0.9rem; color: #666; margin-bottom: 6px; }
         .summary-card .amount { font-size: 1.8rem; font-weight: bold; }
-
         .total .amount { color: #9b59b6; }
         .expenses .amount { color: #f39c12; }
         .balance .amount { color: #2ecc71; }
 
         .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-        .card { background: #fff; padding: 18px; border-radius: 10px; box-shadow: 0 5px 12px rgba(0,0,0,0.06); }
+        .card { background: #fff; padding: 18px; border-radius: 10px;
+                box-shadow: 0 5px 12px rgba(0,0,0,0.06); }
         .card h2 { font-size: 1.1rem; margin-bottom: 10px; }
 
         .chart-container { height: 300px; }
+
         .expense-layout { display: flex; align-items: flex-start; gap: 18px; }
 
-        /* Custom legend */
+        /* Custom legend small font */
         .custom-legend { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-        .legend-item { display: flex; align-items: center; gap: 10px; }
-        .legend-swatch { width: 20px; height: 16px; border-radius: 3px; }
 
-        .legend-item span { font-weight: 600; font-size: 15px; }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-swatch {
+            width: 18px;
+            height: 14px;
+            border-radius: 3px;
+        }
+
+        .legend-item span {
+            font-size: 13px;
+            font-weight: 600;
+        }
 
         table { width: 100%; border-collapse: collapse; margin-top: 12px; }
         th, td { padding: 10px; border-bottom: 1px solid #eaeaea; }
         th { background: #f8f8f8; font-weight: 600; }
         tr:hover { background: #f9f9f9; }
-
         .highlight { background: #eef6ff; font-weight: bold; }
     </style>
 </head>
@@ -88,6 +103,7 @@
                     <canvas id="expensesChart"></canvas>
                 </div>
 
+                <!-- LEGEND AREA -->
                 <div class="custom-legend" id="expenseLegend"></div>
             </div>
 
@@ -123,17 +139,14 @@ const expenseData = [
     { category: 'Ped ki katai', amount: 1300 }
 ];
 
-// matching colors
+// Same colors used in chart
 const legendColors = ["#9b59b6", "#3498db", "#f39c12", "#8e44ad", "#5dade2"];
 
-/* ---- Dummy investment table (same as your input) ---- */
+/* ---- Dummy investment data ---- */
 const investmentData = [
     { month: 'Jan-23', pankaj: 0, puneet: 0, lucky: 20000, total: 20000 },
     { month: 'Feb-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
     { month: 'Mar-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-    { month: 'Apr-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-    { month: 'May-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-    { month: 'Jun-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 }
 ];
 
 /* ----------------- Populate Table ------------------ */
@@ -185,15 +198,15 @@ new Chart(document.getElementById("expensesChart"), {
     options: { responsive:true, maintainAspectRatio:false }
 });
 
-/* ---------------- Custom Color Legend ---------------- */
+/* ---------------- Custom ONLY-AMOUNT Legend ---------------- */
 const legendBox = document.getElementById("expenseLegend");
 
 expenseData.forEach((item, i) => {
     legendBox.innerHTML += `
         <div class="legend-item">
             <div class="legend-swatch" style="background:${legendColors[i]};"></div>
-            <span style="color:${legendColors[i]}">
-                ${item.category} – ₹${item.amount.toLocaleString()}
+            <span style="color:${legendColors[i]};">
+                ₹${item.amount.toLocaleString()}
             </span>
         </div>
     `;
