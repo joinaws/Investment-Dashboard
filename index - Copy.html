@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; padding: 20px; }
+        .dashboard-container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #2c3e50, #4a6491); color: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        .subtitle { font-size: 1.2rem; opacity: 0.9; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .card h2 { margin-bottom: 15px; color: #2c3e50; border-bottom: 2px solid #eaeaea; padding-bottom: 10px; }
+        .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .summary-card { background: white; border-radius: 10px; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .summary-card h3 { font-size: 1rem; margin-bottom: 10px; color: #7f8c8d; }
+        .summary-card .amount { font-size: 1.8rem; font-weight: bold; }
+        .summary-card.total { border-top: 4px solid #9b59b6; }
+        .summary-card.total .amount { color: #9b59b6; }
+        .summary-card.expenses { border-top: 4px solid #f39c12; }
+        .summary-card.expenses .amount { color: #f39c12; }
+        .summary-card.balance { border-top: 4px solid #2ecc71; }
+        .summary-card.balance .amount { color: #2ecc71; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eaeaea; }
+        th { background-color: #f8f9fa; font-weight: 600; color: #2c3e50; }
+        tr:hover { background-color: #f8f9fa; }
+        .chart-container { height: 300px; margin-top: 20px; }
+        .expense-chart { height: 250px; margin-top: 20px; }
+        .highlight { background-color: #e8f4fd; font-weight: bold; }
+        .adjustment-section { background: white; border-radius: 10px; padding: 20px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .adjustment-section h2 { color: #2c3e50; margin-bottom: 15px; border-bottom: 2px solid #eaeaea; padding-bottom: 10px; }
+        .adjustment-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eaeaea; }
+        .adjustment-item:last-child { border-bottom: none; }
+        .adjustment-name { font-weight: 500; }
+        .adjustment-amount { font-weight: bold; color: #e74c3c; }
+        @media (max-width: 768px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .summary-cards { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h1>Investment Dashboard</h1>
+            <p class="subtitle">Tracking contributions and expenses</p>
+        </header>
+        
+        <div class="summary-cards">
+            <div class="summary-card total">
+                <h3>Total Investment</h3>
+                <div class="amount">₹1,170,000</div>
+            </div>
+            <div class="summary-card expenses">
+                <h3>Total Expenses</h3>
+                <div class="amount">₹410,000</div>
+            </div>
+            <div class="summary-card balance">
+                <h3>Available Balance</h3>
+                <div class="amount">₹510,000</div>
+            </div>
+        </div>
+        
+        <div class="adjustment-section">
+            <h2>Adjustments</h2>
+            <div class="adjustment-item">
+                <div class="adjustment-name">Less: Pankaj MISC</div>
+                <div class="adjustment-amount">₹250,000</div>
+            </div>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>Monthly Contributions</h2>
+                <div class="chart-container">
+                    <canvas id="contributionsChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Expense Breakdown</h2>
+                <div class="expense-chart">
+                    <canvas id="expensesChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Investment Details</h2>
+            <div style="overflow-x: auto;">
+                <table id="investmentTable">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Pankaj (₹)</th>
+                            <th>Puneet (₹)</th>
+                            <th>Lucky (₹)</th>
+                            <th>Total (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Investment data (Jan-23 note remains unchanged)
+        const investmentData = [
+            { month: 'Jan-23', pankaj: 0, puneet: 0, lucky: 20000, total: 20000, note: 'Pankaj Received 20000' },
+            { month: 'Feb-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Mar-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Apr-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'May-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Jun-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Jul-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Aug-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Sep-23', pankaj: 0, puneet: 0, lucky: 0, total: 0 },
+            { month: 'Oct-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Nov-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Dec-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Jan-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Feb-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Mar-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Apr-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'May-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Jun-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Jul-24', pankaj: 0, puneet: 0, lucky: 0, total: 0 },
+            { month: 'Aug-24', pankaj: 0, puneet: 0, lucky: 0, total: 0 },
+            { month: 'Sep-24', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Oct-24', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Nov-24', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Dec-24', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Jan-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Feb-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Mar-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Apr-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'May-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Jun-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Jul-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Aug-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Sep-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Oct-25', pankaj: 0, puneet: 0, lucky: 0, total: 0 },
+            { month: 'Nov-25', pankaj: 0, puneet: 0, lucky: 0, total: 0 },
+            { month: 'Dec-25', pankaj: 0, puneet: 0, lucky: 0, total: 0 }
+        ];
+
+        // Expense data
+        const expenseData = [
+            { category: 'Shiwpur Khet Me', amount: 280000 },
+            { category: 'Pankaj (Delhi Home Loan)', amount: 126000 },
+            { category: 'Mitti', amount: 4000 }
+        ];
+
+        // Adjustment data
+        const adjustmentData = [
+            { name: 'Less: Pankaj MISC', amount: 250000 }
+        ];
+
+        // Populate investment table
+        const tableBody = document.querySelector('#investmentTable tbody');
+        investmentData.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.month}</td>
+                <td>${item.pankaj}${item.note ? ' (' + item.note + ')' : ''}</td>
+                <td>${item.puneet}</td>
+                <td>${item.lucky}</td>
+                <td class="highlight">${item.total}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        // Calculate totals
+        const investmentTotal = investmentData.reduce((sum, item) => sum + item.total, 0);
+        const expenseTotal = expenseData.reduce((sum, item) => sum + item.amount, 0);
+        const adjustmentTotal = adjustmentData.reduce((sum, item) => sum + item.amount, 0);
+        const availableBalance = investmentTotal - expenseTotal - adjustmentTotal;
+
+        // Update summary cards
+        document.querySelector('.summary-card.total .amount').textContent = `₹${investmentTotal.toLocaleString()}`;
+        document.querySelector('.summary-card.expenses .amount').textContent = `₹${expenseTotal.toLocaleString()}`;
+        document.querySelector('.summary-card.balance .amount').textContent = `₹${availableBalance.toLocaleString()}`;
+
+        // Contributions chart
+        const contributionsCtx = document.getElementById('contributionsChart').getContext('2d');
+        new Chart(contributionsCtx, {
+            type: 'bar',
+            data: {
+                labels: investmentData.map(item => item.month),
+                datasets: [
+                    { label: 'Pankaj', data: investmentData.map(item => item.pankaj), backgroundColor: 'rgba(52, 152, 219, 0.7)', borderColor: 'rgba(52, 152, 219, 1)', borderWidth: 1 },
+                    { label: 'Puneet', data: investmentData.map(item => item.puneet), backgroundColor: 'rgba(46, 204, 113, 0.7)', borderColor: 'rgba(46, 204, 113, 1)', borderWidth: 1 },
+                    { label: 'Lucky', data: investmentData.map(item => item.lucky), backgroundColor: 'rgba(231, 76, 60, 0.7)', borderColor: 'rgba(231, 76, 60, 1)', borderWidth: 1 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { x: { stacked: false, ticks: { maxRotation: 45, minRotation: 45 } }, y: { stacked: false, beginAtZero: true, title: { display: true, text: 'Amount (₹)' } } },
+                plugins: { title: { display: true, text: 'Monthly Contributions by Investor' } }
+            }
+        });
+
+        // Expenses chart
+        const expensesCtx = document.getElementById('expensesChart').getContext('2d');
+        new Chart(expensesCtx, {
+            type: 'doughnut',
+            data: { labels: expenseData.map(item => item.category), datasets: [{ data: expenseData.map(item => item.amount), backgroundColor: ['rgba(155, 89, 182, 0.7)','rgba(52, 152, 219, 0.7)','rgba(243, 156, 18, 0.7)'], borderColor: ['rgba(155, 89, 182, 1)','rgba(52, 152, 219, 1)','rgba(243, 156, 18, 1)'], borderWidth: 1 }] },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' },
+                    title: { display: true, text: 'Expense Distribution' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                const total = expenseData.reduce((sum, item) => sum + item.amount, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${context.label}: ₹${value.toLocaleString()} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
