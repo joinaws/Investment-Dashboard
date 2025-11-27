@@ -1,338 +1,232 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>InvestAdmin — Tailwind Clean Dashboard</title>
-
-  <!-- Tailwind CDN for quick edit -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-  <style>
-    /* small custom tweaks */
-    body { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale }
-    .card { box-shadow: 0 8px 28px rgba(15,23,42,0.06) }
-    .chart-area { min-height: 220px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; padding: 20px; }
+        .dashboard-container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #2c3e50, #4a6491); color: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        .subtitle { font-size: 1.2rem; opacity: 0.9; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .card h2 { margin-bottom: 15px; color: #2c3e50; border-bottom: 2px solid #eaeaea; padding-bottom: 10px; }
+        .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .summary-card { background: white; border-radius: 10px; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .summary-card h3 { font-size: 1rem; margin-bottom: 10px; color: #7f8c8d; }
+        .summary-card .amount { font-size: 1.8rem; font-weight: bold; }
+        .summary-card.total { border-top: 4px solid #9b59b6; }
+        .summary-card.total .amount { color: #9b59b6; }
+        .summary-card.expenses { border-top: 4px solid #f39c12; }
+        .summary-card.expenses .amount { color: #f39c12; }
+        .summary-card.balance { border-top: 4px solid #2ecc71; }
+        .summary-card.balance .amount { color: #2ecc71; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eaeaea; }
+        th { background-color: #f8f9fa; font-weight: 600; color: #2c3e50; }
+        tr:hover { background-color: #f8f9fa; }
+        .chart-container { height: 300px; margin-top: 20px; }
+        .expense-chart { height: 250px; margin-top: 20px; }
+        .highlight { background-color: #e8f4fd; font-weight: bold; }
+        .adjustment-section { display: none; } /* Hide adjustments */
+        @media (max-width: 768px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .summary-cards { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
-  <div class="min-h-screen max-w-6xl mx-auto p-5 lg:p-8">
-
-    <!-- HEADER -->
-    <header class="flex items-center justify-between gap-4 mb-6">
-      <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-sky-500 to-sky-400 flex items-center justify-center text-white font-bold">INV</div>
-        <div>
-          <h1 class="text-xl font-semibold">InvestAdmin</h1>
-          <div class="text-sm text-slate-500">Tailwind Clean Dashboard</div>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h1>Investment Dashboard</h1>
+            <p class="subtitle">Tracking contributions and expenses</p>
+        </header>
+        
+        <div class="summary-cards">
+            <div class="summary-card total">
+                <h3>Total Investment</h3>
+                <div class="amount">₹1,170,000</div>
+            </div>
+            <div class="summary-card expenses">
+                <h3>Total Expenses</h3>
+                <div class="amount">₹410,000</div>
+            </div>
+            <div class="summary-card balance">
+                <h3>Available Balance</h3>
+                <div class="amount">₹510,000</div>
+            </div>
         </div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <div class="flex items-center bg-white rounded-lg shadow px-3 py-1">
-          <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <input id="globalSearch" class="ml-2 outline-none text-sm bg-transparent" placeholder="Search month or amount (e.g. Jan-25 or 45000)">
+        
+        <!-- Adjustments section is hidden -->
+        <div class="adjustment-section">
+            <h2>Adjustments</h2>
+            <div class="adjustment-item">
+                <div class="adjustment-name">Less: Pankaj MISC</div>
+                <div class="adjustment-amount">₹0</div>
+            </div>
         </div>
-
-        <div class="text-right">
-          <div class="font-medium">Puneet</div>
-          <div class="text-xs text-slate-500">Admin</div>
+        
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>Monthly Contributions</h2>
+                <div class="chart-container">
+                    <canvas id="contributionsChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Expense Breakdown</h2>
+                <div class="expense-chart">
+                    <canvas id="expensesChart"></canvas>
+                </div>
+            </div>
         </div>
-        <div class="w-10 h-10 rounded-lg bg-slate-600 text-white flex items-center justify-center font-semibold">P</div>
-      </div>
-    </header>
-
-    <!-- HERO -->
-    <section class="rounded-2xl p-4 bg-gradient-to-r from-sky-600 to-sky-500 text-white mb-6 card">
-      <div class="flex items-center justify-between">
-        <div>
-          <div class="text-lg font-semibold">Investment Dashboard</div>
-          <div class="text-sm opacity-90">Overview of contributions, expenses and current balance.</div>
+        
+        <div class="card">
+            <h2>Investment Details</h2>
+            <div style="overflow-x: auto;">
+                <table id="investmentTable">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Pankaj (₹)</th>
+                            <th>Puneet (₹)</th>
+                            <th>Lucky (₹)</th>
+                            <th>Total (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="flex gap-2">
-          <button id="exportCsv" class="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-md text-white font-semibold">Export CSV</button>
-          <button class="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-md text-white">Add Entry</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- KPIs -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-sm text-slate-500">Total Investment</div>
-        <div id="totalInvestment" class="text-2xl font-bold mt-2">—</div>
-        <div class="text-xs text-slate-400 mt-1">All contributors</div>
-      </div>
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-sm text-slate-500">Total Expenses</div>
-        <div id="totalExpenses" class="text-2xl font-bold mt-2">—</div>
-        <div class="text-xs text-slate-400 mt-1">Fixed & variable</div>
-      </div>
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-sm text-slate-500">Available Balance</div>
-        <div id="availableBalance" class="text-2xl font-bold mt-2">—</div>
-        <div class="text-xs text-slate-400 mt-1">After expenses</div>
-      </div>
     </div>
 
-    <!-- CONTENT GRID -->
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-6">
+    <script>
+        // Investment data
+        const investmentData = [
+            { month: 'Jan-23', pankaj: 0, puneet: 0, lucky: 20000, total: 20000, note: 'Pankaj Received 20000' },
+            { month: 'Feb-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Mar-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Apr-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'May-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Jun-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Jul-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Aug-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Sep-23', pankaj: 0, puneet: 0, lucky: 0, total: 0 },
+            { month: 'Oct-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Nov-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Dec-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Jan-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Feb-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Mar-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Apr-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'May-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Jun-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
+            { month: 'Jul-24', pankaj: 0, puneet: 0, lucky: 0, total: 0 },
+            { month: 'Aug-24', pankaj: 0, puneet: 0, lucky: 0, total: 0 },
+            { month: 'Sep-24', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Oct-24', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Nov-24', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Dec-24', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Jan-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Feb-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Mar-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Apr-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'May-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Jun-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Jul-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Aug-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Sep-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
+            { month: 'Oct-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 }
+        ];
 
-      <!-- Investments table -->
-      <section class="bg-white rounded-2xl p-4 card">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="font-semibold">Investment Details</h3>
-          <div class="flex items-center gap-2">
-            <label class="text-sm text-slate-500">Filter:</label>
-            <select id="monthFilter" class="px-2 py-1 rounded border text-sm">
-              <option value="">All months</option>
-            </select>
-          </div>
-        </div>
+        // Expense data
+        const expenseData = [
+            { category: 'Shiwpur Khet Me', amount: 280000 },
+            { category: 'Pankaj (Delhi Home Loan)', amount: 126000 },
+            { category: 'Mitti', amount: 4000 },
+            { category: 'Ghar ki Battery', amount: 3700 },
+            { category: 'Ped ki katai', amount: 1300 }
+        ];
 
-        <div class="overflow-x-auto">
-          <table id="investmentTable" class="min-w-full text-sm">
-            <thead class="text-slate-500">
-              <tr>
-                <th class="text-left p-2">Month</th>
-                <th class="text-left p-2">Pankaj (₹)</th>
-                <th class="text-left p-2">Puneet (₹)</th>
-                <th class="text-left p-2">Lucky (₹)</th>
-                <th class="text-left p-2">Total (₹)</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
+        // Adjustment data with 0 amount
+        const adjustmentData = [
+            { name: 'Less: Pankaj MISC', amount: 0 }
+        ];
 
-        <div class="flex items-center justify-between mt-3">
-          <div class="text-xs text-slate-500">Showing <span id="rowsCount">0</span> rows</div>
-          <div class="flex items-center gap-3">
-            <div class="text-xs text-slate-500">Grand Total:</div>
-            <div id="grandTotal" class="px-3 py-1 rounded bg-sky-50 text-sky-700 font-semibold">—</div>
-          </div>
-        </div>
-      </section>
+        // Populate investment table
+        const tableBody = document.querySelector('#investmentTable tbody');
+        investmentData.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.month}</td>
+                <td>${item.pankaj}${item.note ? ' (' + item.note + ')' : ''}</td>
+                <td>${item.puneet}</td>
+                <td>${item.lucky}</td>
+                <td class="highlight">${item.total}</td>
+            `;
+            tableBody.appendChild(row);
+        });
 
-      <!-- Reports (charts) -->
-      <aside class="bg-white rounded-2xl p-4 card">
-        <h3 class="font-semibold mb-3">Reports</h3>
+        // Calculate totals
+        const investmentTotal = investmentData.reduce((sum, item) => sum + item.total, 0);
+        const expenseTotal = expenseData.reduce((sum, item) => sum + item.amount, 0);
+        const adjustmentTotal = adjustmentData.reduce((sum, item) => sum + item.amount, 0);
+        const availableBalance = investmentTotal - expenseTotal - adjustmentTotal;
 
-        <div class="bg-slate-50 rounded-xl p-3 mb-4">
-          <div class="text-sm text-slate-600 mb-2">Monthly Contributions (stacked)</div>
-          <div class="chart-area">
-            <canvas id="contributionsChart"></canvas>
-          </div>
-        </div>
+        // Update summary cards
+        document.querySelector('.summary-card.total .amount').textContent = `₹${investmentTotal.toLocaleString()}`;
+        document.querySelector('.summary-card.expenses .amount').textContent = `₹${expenseTotal.toLocaleString()}`;
+        document.querySelector('.summary-card.balance .amount').textContent = `₹${availableBalance.toLocaleString()}`;
 
-        <div class="bg-slate-50 rounded-xl p-3">
-          <div class="flex items-center justify-between mb-2">
-            <div class="text-sm text-slate-600">Expense Breakdown</div>
-            <div id="topExpense" class="text-sm text-sky-600 font-semibold"></div>
-          </div>
-          <div class="chart-area h-40">
-            <canvas id="expensesChart"></canvas>
-          </div>
-        </div>
-      </aside>
-    </div>
-
-  </div>
-
-  <script>
-    /* -------------------------
-       Full data (kept from you)
-       ------------------------- */
-    const investmentData = [
-      { month: 'Jan-23', pankaj: 0, puneet: 0, lucky: 20000, total: 20000, note: 'Pankaj Received 20000' },
-      { month: 'Feb-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'Mar-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'Apr-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'May-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'Jun-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'Jul-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'Aug-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'Sep-23', pankaj: 0, puneet: 0, lucky: 0, total: 0 },
-      { month: 'Oct-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'Nov-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'Dec-23', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'Jan-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'Feb-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'Mar-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'Apr-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'May-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'Jun-24', pankaj: 0, puneet: 20000, lucky: 20000, total: 40000 },
-      { month: 'Jul-24', pankaj: 0, puneet: 0, lucky: 0, total: 0 },
-      { month: 'Aug-24', pankaj: 0, puneet: 0, lucky: 0, total: 0 },
-      { month: 'Sep-24', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
-      { month: 'Oct-24', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
-      { month: 'Nov-24', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
-      { month: 'Dec-24', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
-      { month: 'Jan-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
-      { month: 'Feb-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
-      { month: 'Mar-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
-      { month: 'Apr-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
-      { month: 'May-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
-      { month: 'Jun-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
-      { month: 'Jul-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
-      { month: 'Aug-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
-      { month: 'Sep-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 },
-      { month: 'Oct-25', pankaj: 15000, puneet: 15000, lucky: 15000, total: 45000 }
-    ];
-
-    const expenseData = [
-      { category: 'Shiwpur Khet Me', amount: 280000 },
-      { category: 'Pankaj (Delhi Home Loan)', amount: 126000 },
-      { category: 'Mitti', amount: 4000 },
-      { category: 'Ghar ki Battery', amount: 3700 },
-      { category: 'Ped ki katai', amount: 1300 }
-    ];
-
-    /* ---------- helpers ---------- */
-    const formatINR = n => '₹' + Number(n).toLocaleString('en-IN');
-
-    /* ---------- table & KPIs ---------- */
-    const tbody = document.querySelector('#investmentTable tbody');
-    const monthFilter = document.getElementById('monthFilter');
-    const rowsCount = document.getElementById('rowsCount');
-    const grandTotalEl = document.getElementById('grandTotal');
-
-    function renderTable(filter='') {
-      tbody.innerHTML = '';
-      const filtered = investmentData.filter(r => {
-        if (!filter) return true;
-        return r.month.toLowerCase().includes(filter.toLowerCase());
-      });
-      filtered.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="p-2">${r.month}${r.note?'<div class="text-xs text-slate-500 mt-1">'+r.note+'</div>':''}</td>
-          <td class="p-2">${formatINR(r.pankaj)}</td>
-          <td class="p-2">${formatINR(r.puneet)}</td>
-          <td class="p-2">${formatINR(r.lucky)}</td>
-          <td class="p-2"><span class="px-2 py-1 rounded bg-sky-50 text-sky-700 font-semibold">${formatINR(r.total)}</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
-      rowsCount.textContent = filtered.length;
-      const grand = filtered.reduce((s,x)=>s+x.total,0);
-      grandTotalEl.textContent = formatINR(grand);
-    }
-
-    (function populateMonthFilter(){
-      const months = [...new Set(investmentData.map(d=>d.month))];
-      months.forEach(m=>{
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m;
-        monthFilter.appendChild(opt);
-      });
-    })();
-
-    const totalInvestment = investmentData.reduce((s,x)=>s+x.total,0);
-    const totalExpenses = expenseData.reduce((s,x)=>s+x.amount,0);
-    const availableBalance = totalInvestment - totalExpenses;
-
-    document.getElementById('totalInvestment').textContent = formatINR(totalInvestment);
-    document.getElementById('totalExpenses').textContent = formatINR(totalExpenses);
-    document.getElementById('availableBalance').textContent = formatINR(availableBalance);
-
-    renderTable();
-
-    monthFilter.addEventListener('change', (e)=> renderTable(e.target.value));
-    document.getElementById('globalSearch').addEventListener('input', (e)=> renderTable(e.target.value));
-
-    /* ---------- charts ---------- */
-    const labels = investmentData.map(d=>d.month);
-    const pankajData = investmentData.map(d=>d.pankaj);
-    const puneetData = investmentData.map(d=>d.puneet);
-    const luckyData = investmentData.map(d=>d.lucky);
-
-    const ctxC = document.getElementById('contributionsChart').getContext('2d');
-    const contributionsChart = new Chart(ctxC, {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          { label: 'Pankaj', data: pankajData, backgroundColor: '#0b6cff' },
-          { label: 'Puneet', data: puneetData, backgroundColor: '#06b6d4' },
-          { label: 'Lucky', data: luckyData, backgroundColor: '#f97316' }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.dataset.label}: ${formatINR(ctx.raw)}`
+        // Contributions chart
+        const contributionsCtx = document.getElementById('contributionsChart').getContext('2d');
+        new Chart(contributionsCtx, {
+            type: 'bar',
+            data: {
+                labels: investmentData.map(item => item.month),
+                datasets: [
+                    { label: 'Pankaj', data: investmentData.map(item => item.pankaj), backgroundColor: 'rgba(52, 152, 219, 0.7)', borderColor: 'rgba(52, 152, 219, 1)', borderWidth: 1 },
+                    { label: 'Puneet', data: investmentData.map(item => item.puneet), backgroundColor: 'rgba(46, 204, 113, 0.7)', borderColor: 'rgba(46, 204, 113, 1)', borderWidth: 1 },
+                    { label: 'Lucky', data: investmentData.map(item => item.lucky), backgroundColor: 'rgba(231, 76, 60, 0.7)', borderColor: 'rgba(231, 76, 60, 1)', borderWidth: 1 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { x: { stacked: false, ticks: { maxRotation: 45, minRotation: 45 } }, y: { stacked: false, beginAtZero: true, title: { display: true, text: 'Amount (₹)' } } },
+                plugins: { title: { display: true, text: 'Monthly Contributions by Investor' } }
             }
-          },
-          legend: { position: 'top' }
-        },
-        scales: {
-          x: { stacked: true, ticks: { maxRotation: 45, minRotation: 0 } },
-          y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Amount (₹)' } }
-        }
-      }
-    });
+        });
 
-    const expenseLabels = expenseData.map(e => e.category);
-    const expenseAmounts = expenseData.map(e => e.amount);
-    const expenseColors = ['#7c3aed','#0b6cff','#f59e0b','#ef4444','#10b981'];
-    const totalExpense = expenseAmounts.reduce((a,b)=>a+b,0);
-    document.getElementById('topExpense').textContent = `${expenseData[0].category} • ${formatINR(expenseData[0].amount)}`;
-
-    const ctxE = document.getElementById('expensesChart').getContext('2d');
-    const expensesChart = new Chart(ctxE, {
-      type: 'doughnut',
-      data: { labels: expenseLabels, datasets: [{ data: expenseAmounts, backgroundColor: expenseColors }] },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom' },
-          tooltip: {
-            callbacks: {
-              label: ctx => {
-                const v = ctx.raw;
-                const pct = ((v/totalExpense)*100).toFixed(1);
-                return `${ctx.label}: ${formatINR(v)} (${pct}%)`;
-              }
+        // Expenses chart
+        const expensesCtx = document.getElementById('expensesChart').getContext('2d');
+        new Chart(expensesCtx, {
+            type: 'doughnut',
+            data: { labels: expenseData.map(item => item.category), datasets: [{ data: expenseData.map(item => item.amount), backgroundColor: ['rgba(155, 89, 182, 0.7)','rgba(52, 152, 219, 0.7)','rgba(243, 156, 18, 0.7)'], borderColor: ['rgba(155, 89, 182, 1)','rgba(52, 152, 219, 1)','rgba(243, 156, 18, 1)'], borderWidth: 1 }] },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' },
+                    title: { display: true, text: 'Expense Distribution' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                const total = expenseData.reduce((sum, item) => sum + item.amount, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${context.label}: ₹${value.toLocaleString()} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
             }
-          }
-        }
-      }
-    });
-
-    /* ---------- export CSV ---------- */
-    document.getElementById('exportCsv').addEventListener('click', () => {
-      const headers = ['Month','Pankaj','Puneet','Lucky','Total'];
-      const rows = investmentData.map(r => [r.month, r.pankaj, r.puneet, r.lucky, r.total]);
-      let csv = headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'investment-data.csv';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    });
-
-    /* ---------- tiny UX guards (no reloads) ---------- */
-    // ensure no auto reload script exists and prevent accidental '#' anchors reload
-    document.querySelectorAll('a[href="#"]').forEach(a => a.addEventListener('click', e => e.preventDefault()));
-    // make sure any buttons inside forms don't submit (we don't use forms here, but safe-guard)
-    document.querySelectorAll('button').forEach(b => { if(!b.hasAttribute('type')) b.setAttribute('type','button') });
-
-    // redraw charts on resize so they fit nicely
-    window.addEventListener('resize', () => { contributionsChart.resize(); expensesChart.resize(); });
-
-  </script>
+        });
+    </script>
 </body>
 </html>
